@@ -1,0 +1,536 @@
+; this is SDP Syntax
+; from https://tools.ietf.org/html/rfc4566
+; with https://www.rfc-editor.org/errata/eid4903
+
+; related
+; sip https://www.ietf.org/rfc/rfc3261.txt
+; sdp referred to in https://tools.ietf.org/html/rfc2327
+; sdp obsoleting 2327 https://tools.ietf.org/html/rfc4566
+
+
+session-description = proto-version
+                        origin-field
+                        session-name-field
+                        information-field
+                        uri-field
+                        email-fields
+                        phone-fields
+                        [connection-field]
+                        bandwidth-fields
+                        time-fields
+                        key-field
+                        attribute-fields
+                        media-descriptions
+
+proto-version =       %x76 "=" 1*DIGIT CRLF
+                        ;this memo describes version 0
+
+origin-field =        %x6F "=" username SP sess-id SP sess-version SP
+                        nettype SP addrtype SP unicast-address CRLF
+
+session-name-field =  %x73 "=" text CRLF
+
+information-field =   [%x69 "=" text CRLF]
+
+uri-field =           [%x75 "=" uri CRLF]
+
+email-fields =        *(%x65 "=" email-address CRLF)
+
+phone-fields =        *(%x70 "=" phone-number CRLF)
+
+   connection-field =    %x63 "=" nettype SP addrtype SP
+                         connection-address CRLF
+                         ;a connection field must be present
+                         ;in every media description or at the
+                         ;session-level
+
+
+bandwidth-fields =    *(%x62 "=" bwtype ":" bandwidth CRLF)
+
+time-fields =         1*( %x74 "=" start-time SP stop-time
+                        *(CRLF repeat-fields) CRLF)
+                        [zone-adjustments CRLF]
+
+repeat-fields =       %x72 "=" repeat-interval SP typed-time
+                        1*(SP typed-time)
+
+zone-adjustments =    %x7A "=" time SP ["-"] typed-time
+                        *(SP time SP ["-"] typed-time)
+
+key-field =           [%x6B "=" key-type CRLF]
+
+attribute-fields =    *(%x61 "=" attribute CRLF)
+
+media-descriptions =  *( media-field
+                        information-field
+                        *connection-field
+                        bandwidth-fields
+                        key-field
+                        attribute-fields )
+
+media-field =         %x6D "=" media SP port ["/" integer]
+                        SP proto 1*(SP fmt) CRLF
+
+; sub-rules of 'o='
+username =            non-ws-string
+                        ;pretty wide definition, but doesn't
+                        ;include space
+
+sess-id =             1*DIGIT
+                        ;should be unique for this username/host
+
+sess-version =        1*DIGIT
+
+nettype =             token
+                        ;typically "IN"
+
+addrtype =            token
+                        ;typically "IP4" or "IP6"
+
+; sub-rules of 'u='
+uri =                 URI-reference
+                        ; see RFC 3986
+
+
+
+; sub-rules of 'e=', see RFC 2822 for definitions
+email-address        = address-and-comment / dispname-and-address
+                        / addr-spec
+address-and-comment  = addr-spec 1*SP "(" 1*email-safe ")"
+dispname-and-address = 1*email-safe 1*SP "<" addr-spec ">"
+
+; sub-rules of 'p='
+phone-number =        phone *SP "(" 1*email-safe ")" /
+                        1*email-safe "<" phone ">" /
+                        phone
+
+phone =               ["+"] DIGIT 1*(SP / "-" / DIGIT)
+
+; sub-rules of 'c='
+connection-address =  multicast-address / unicast-address
+
+; sub-rules of 'b='
+bwtype =              token
+
+bandwidth =           1*DIGIT
+
+; sub-rules of 't='
+start-time =          time / "0"
+
+stop-time =           time / "0"
+
+time =                POS-DIGIT 9*DIGIT
+                        ; Decimal representation of NTP time in
+                        ; seconds since 1900.  The representation
+                        ; of NTP time is an unbounded length field
+                        ; containing at least 10 digits.  Unlike the
+                        ; 64-bit representation used elsewhere, time
+                        ; in SDP does not wrap in the year 2036.
+
+; sub-rules of 'r=' and 'z='
+repeat-interval =     POS-DIGIT *DIGIT [fixed-len-time-unit]
+
+typed-time =          1*DIGIT [fixed-len-time-unit]
+
+fixed-len-time-unit = %x64 / %x68 / %x6D / %x73
+
+; sub-rules of 'k='
+key-type =            %x70 %x72 %x6F %x6D %x70 %x74 /     ; "prompt"
+                        %x63 %x6C %x65 %x61 %x72 ":" text / ; "clear:"
+                        %x62 %x61 %x73 %x65 "64:" base64 /  ; "base64:"
+                        %x75 %x72 %x69 ":" uri              ; "uri:"
+
+base64      =         *base64-unit [base64-pad]
+
+
+base64-unit =         4base64-char
+base64-pad  =         2base64-char "==" / 3base64-char "="
+base64-char =         ALPHA / DIGIT / "+" / "/"
+
+; sub-rules of 'a='
+attribute =           (att-field ":" att-value) / att-field
+
+att-field =           token
+
+att-value =           byte-string
+
+; sub-rules of 'm='
+media =               token
+                        ;typically "audio", "video", "text", or
+                        ;"application"
+
+fmt =                 token
+                        ;typically an RTP payload type for audio
+                        ;and video media
+
+proto  =              token *("/" token)
+                        ;typically "RTP/AVP" or "udp"
+
+port =                1*DIGIT
+
+; generic sub-rules: addressing
+unicast-address =     IP4-address / IP6-address / FQDN / extn-addr
+
+multicast-address =   IP4-multicast / IP6-multicast / FQDN
+                        / extn-addr
+
+IP4-multicast =       m1 3( "." decimal-uchar )
+                        "/" ttl [ "/" integer ]
+                        ; IPv4 multicast addresses may be in the
+                        ; range 224.0.0.0 to 239.255.255.255
+
+m1 =                  ("22" ("4"/"5"/"6"/"7"/"8"/"9")) /
+                        ("23" DIGIT )
+
+IP6-multicast =       hexpart [ "/" integer ]
+                        ; IPv6 address starting with FF
+
+ttl =                 (POS-DIGIT *2DIGIT) / "0"
+
+FQDN =                4*(alpha-numeric / "-" / ".")
+                        ; fully qualified domain name as specified
+                        ; in RFC 1035 (and updates)
+
+
+IP4-address =         b1 3("." decimal-uchar)
+
+b1 =                  decimal-uchar
+                        ; less than "224"
+
+; The following is consistent with RFC 2373 [30], Appendix B.
+IP6-address =         hexpart [ ":" IP4-address ]
+
+hexpart =             hexseq / hexseq "::" [ hexseq ] /
+                        "::" [ hexseq ]
+
+hexseq  =             hex4 *( ":" hex4)
+
+hex4    =             1*4HEXDIG
+
+; Generic for other address families
+extn-addr =           non-ws-string
+
+; generic sub-rules: datatypes
+text =                byte-string
+                        ;default is to interpret this as UTF8 text.
+                        ;ISO 8859-1 requires "a=charset:ISO-8859-1"
+                        ;session-level attribute to be used
+
+byte-string =         1*(%x01-09/%x0B-0C/%x0E-FF)
+                        ;any byte except NUL, CR, or LF
+
+non-ws-string =       1*(VCHAR/%x80-FF)
+                        ;string of visible characters
+
+token-char =          %x21 / %x23-27 / %x2A-2B / %x2D-2E / %x30-39
+                        / %x41-5A / %x5E-7E
+
+token =               1*(token-char)
+
+email-safe =          %x01-09/%x0B-0C/%x0E-27/%x2A-3B/%x3D/%x3F-FF
+                        ;any byte except NUL, CR, LF, or the quoting
+                        ;characters ()<>
+
+integer =             POS-DIGIT *DIGIT
+
+; generic sub-rules: primitives
+alpha-numeric =       ALPHA / DIGIT
+
+POS-DIGIT =           %x31-39 ; 1 - 9
+
+
+decimal-uchar =       DIGIT
+                        / POS-DIGIT DIGIT
+                        / ("1" 2*(DIGIT))
+                        / ("2" ("0"/"1"/"2"/"3"/"4") DIGIT)
+                        / ("2" "5" ("0"/"1"/"2"/"3"/"4"/"5"))
+
+; external references:
+        ; ALPHA, DIGIT, CRLF, SP, VCHAR: from RFC 4234
+        ; URI-reference: from RFC 3986
+        ; addr-spec: from RFC 2822
+
+;rfc2822 but replaced by 5322, so we used THAT
+;
+
+
+addr-spec       =   local-part "@" domain
+
+local-part      =   dot-atom / quoted-string / obs-local-part
+
+domain          =   dot-atom / domain-literal / obs-domain
+
+domain-literal  =   [CFWS] "[" *([FWS] dtext) [FWS] "]" [CFWS]
+
+dtext           =   %d33-90 /          ; Printable US-ASCII
+                %d94-126 /         ;  characters not including
+                obs-dtext          ;  "[", "]", or "\"
+
+atext           =   ALPHA / DIGIT /    ; Printable US-ASCII
+                "!" / "#" /        ;  characters not including
+                "$" / "%" /        ;  specials.  Used for atoms.
+                "&" / "'" /
+                "*" / "+" /
+                "-" / "/" /
+                "=" / "?" /
+                "^" / "_" /
+                "`" / "{" /
+                "|" / "}" /
+                "~"
+
+atom            =   [CFWS] 1*atext [CFWS]
+
+dot-atom-text   =   1*atext *("." 1*atext)
+
+dot-atom        =   [CFWS] dot-atom-text [CFWS]
+
+specials        =   "(" / ")" /        ; Special characters that do
+                "<" / ">" /        ;  not appear in atext
+                "[" / "]" /
+                ":" / ";" /
+                "@" / "\" /
+                "," / "." /
+                DQUOTE
+
+qtext           =   %d33 /             ; Printable US-ASCII
+                %d35-91 /          ;  characters not including
+                %d93-126 /         ;  "\" or the quote character
+                obs-qtext
+
+qcontent        =   qtext / quoted-pair
+
+quoted-string   =   [CFWS]
+                DQUOTE *([FWS] qcontent) [FWS] DQUOTE
+                [CFWS]
+
+word            =   atom / quoted-string
+
+phrase          =   1*word / obs-phrase
+
+quoted-pair     =   ("\" (VCHAR / WSP)) / obs-qp
+
+FWS             =   ([*WSP CRLF] 1*WSP) /  obs-FWS
+                                        ; Folding white space
+
+ctext           =   %d33-39 /          ; Printable US-ASCII
+                %d42-91 /          ;  characters not including
+                %d93-126 /         ;  "(", ")", or "\"
+                obs-ctext
+
+ccontent        =   ctext / quoted-pair / comment
+
+comment         =   "(" *([FWS] ccontent) [FWS] ")"
+
+CFWS            =   (1*([FWS] comment) [FWS]) / FWS
+
+
+
+
+obs-ctext       =   obs-NO-WS-CTL
+
+obs-qtext       =   obs-NO-WS-CTL
+
+obs-utext       =   %d0 / obs-NO-WS-CTL / VCHAR
+
+obs-qp          =   "\" (%d0 / obs-NO-WS-CTL / LF / CR)
+
+obs-phrase      =   word *(word / "." / CFWS)
+
+obs-phrase-list =   [phrase / CFWS] *("," [phrase / CFWS])
+
+
+obs-angle-addr  =   [CFWS] "<" obs-route addr-spec ">" [CFWS]
+
+obs-route       =   obs-domain-list ":"
+
+obs-domain-list =   *(CFWS / ",") "@" domain
+                *("," [CFWS] ["@" domain])
+
+obs-mbox-list   =   *([CFWS] ",") mailbox *("," [mailbox / CFWS])
+
+obs-addr-list   =   *([CFWS] ",") address *("," [address / CFWS])
+
+obs-group-list  =   1*([CFWS] ",") [CFWS]
+
+obs-local-part  =   word *("." word)
+
+obs-domain      =   atom *("." atom)
+
+obs-dtext       =   obs-NO-WS-CTL / quoted-pair
+
+obs-FWS         =   1*WSP *(CRLF 1*WSP)
+
+obs-NO-WS-CTL   =   %d1-8 /            ; US-ASCII control
+                %d11 /             ;  characters that do not
+                %d12 /             ;  include the carriage
+                %d14-31 /          ;  return, line feed, and
+                %d127              ;  white space characters
+
+address         =   mailbox / group
+
+mailbox         =   name-addr / addr-spec
+
+name-addr       =   [display-name] angle-addr
+
+angle-addr      =   [CFWS] "<" addr-spec ">" [CFWS] /
+                obs-angle-addr
+
+group           =   display-name ":" [group-list] ";" [CFWS]
+
+display-name    =   phrase
+
+mailbox-list    =   (mailbox *("," mailbox)) / obs-mbox-list
+
+address-list    =   (address *("," address)) / obs-addr-list
+
+group-list      =   mailbox-list / CFWS / obs-group-list
+
+
+        
+; rfc2234-6.1
+ALPHA          =  %x41-5A / %x61-7A   ; A-Z / a-z
+
+BIT            =  "0" / "1"
+
+CHAR           =  %x01-7F
+                        ; any 7-bit US-ASCII character,
+                        ;  excluding NUL
+
+CR             =  %x0D
+                        ; carriage return
+
+CRLF           =  CR LF
+                        ; Internet standard newline
+
+CTL            =  %x00-1F / %x7F
+                        ; controls
+
+DIGIT          =  %x30-39
+                        ; 0-9
+
+DQUOTE         =  %x22
+                        ; " (Double Quote)
+
+HEXDIG         =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
+
+HTAB           =  %x09
+                        ; horizontal tab
+
+LF             =  %x0A
+                        ; linefeed
+
+LWSP           =  *(WSP / CRLF WSP)
+                        ; linear white space (past newline)
+
+OCTET          =  %x00-FF
+                        ; 8 bits of data
+
+SP             =  %x20
+                        ; space
+
+VCHAR          =  %x21-7E
+                        ; visible (printing) characters
+
+WSP            =  SP / HTAB
+                        ; white space
+
+; rfc3986 URI
+URI           = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+
+hier-part     = "//" authority path-abempty
+                / path-absolute
+                / path-rootless
+                / path-empty
+
+URI-reference = URI / relative-ref
+
+absolute-URI  = scheme ":" hier-part [ "?" query ]
+
+relative-ref  = relative-part [ "?" query ] [ "#" fragment ]
+
+relative-part = "//" authority path-abempty
+                / path-absolute
+                / path-noscheme
+                / path-empty
+
+scheme        = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+
+authority     = [ userinfo "@" ] host [ ":" xport ]
+userinfo      = *( unreserved / pct-encoded / sub-delims / ":" )
+host          = IP-literal / IPv4address / reg-name
+xport          = *DIGIT
+
+IP-literal    = "[" ( IPv6address / IPvFuture  ) "]"
+
+IPvFuture     = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+
+IPv6address   =                            6( h16 ":" ) ls32
+                /                       "::" 5( h16 ":" ) ls32
+                / [               h16 ] "::" 4( h16 ":" ) ls32
+                / [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
+                / [ *2( h16 ":" ) h16 ] "::" 2( h16 ":" ) ls32
+                / [ *3( h16 ":" ) h16 ] "::"    h16 ":"   ls32
+                / [ *4( h16 ":" ) h16 ] "::"              ls32
+                / [ *5( h16 ":" ) h16 ] "::"              h16
+                / [ *6( h16 ":" ) h16 ] "::"
+
+h16           = 1*4HEXDIG
+ls32          = ( h16 ":" h16 ) / IPv4address
+IPv4address   = dec-octet "." dec-octet "." dec-octet "." dec-octet
+
+dec-octet     = DIGIT                 ; 0-9
+                / %x31-39 DIGIT         ; 10-99
+                / "1" 2DIGIT            ; 100-199
+                / "2" %x30-34 DIGIT     ; 200-249
+                / "25" %x30-35          ; 250-255
+
+reg-name      = *( unreserved / pct-encoded / sub-delims )
+
+path          = path-abempty    ; begins with "/" or is empty
+                / path-absolute   ; begins with "/" but not "//"
+                / path-noscheme   ; begins with a non-colon segment
+                / path-rootless   ; begins with a segment
+                / path-empty      ; zero characters
+
+path-abempty  = *( "/" segment )
+path-absolute = "/" [ segment-nz *( "/" segment ) ]
+path-noscheme = segment-nz-nc *( "/" segment )
+path-rootless = segment-nz *( "/" segment )
+path-empty    = 0<pchar>
+
+segment       = *pchar
+segment-nz    = 1*pchar
+segment-nz-nc = 1*( unreserved / pct-encoded / sub-delims / "@" )
+                ; non-zero-length segment without any colon ":"
+
+pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+
+query         = *( pchar / "/" / "?" )
+
+fragment      = *( pchar / "/" / "?" )
+
+pct-encoded   = "%" HEXDIG HEXDIG
+
+unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+reserved      = gen-delims / sub-delims
+gen-delims    = ":" / "/" / "?" / "#" / "[" / "]" / "@"
+sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
+                / "*" / "+" / "," / ";" / "="
+
+
+
+;   Full Copyright Statement
+;
+;   Copyright (C) The Internet Society (2006).
+;
+;   This document is subject to the rights, licenses and restrictions
+;   contained in BCP 78, and except as set forth therein, the authors
+;   retain all their rights.
+;
+;   This document and the information contained herein are provided on an
+;   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+;   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE INTERNET
+;   ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
+;   INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
+;   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+;   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
