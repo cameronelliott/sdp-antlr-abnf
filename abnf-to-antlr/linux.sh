@@ -27,6 +27,7 @@ unix2dos sdp.abnf           # fixup crlf
 
 
 # create a wellformed g4 file, with header line
+# rm -rf ../output-*
 echo "grammar sdp;" >sdp.g4
 mono ./Abnf-To-Antlr/AbnfToAntlr/bin/Debug/AbnfToAntlr.exe sdp.abnf >>sdp.g4
 java -jar antlr-4.8-complete.jar -Dlanguage=Go -o ../output-go sdp.g4
