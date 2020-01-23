@@ -33,8 +33,9 @@ java -jar antlr-4.8-complete.jar -Dlanguage=Go -o ../output-go sdp.g4
 java -jar antlr-4.8-complete.jar -Dlanguage=Java -o ../output-java sdp.g4
 java -jar antlr-4.8-complete.jar -Dlanguage=CSharp -o ../output-csharp sdp.g4
 java -jar antlr-4.8-complete.jar -Dlanguage=Cpp -o ../output-cpp sdp.g4
-java -jar antlr-4.8-complete.jar -Dlanguage=Javascript -o ../output-js sdp.g4
-java -jar antlr-4.8-complete.jar -Dlanguage=Python -o ../output-python sdp.g4
+java -jar antlr-4.8-complete.jar -Dlanguage=JavaScript -o ../output-js sdp.g4
+java -jar antlr-4.8-complete.jar -Dlanguage=Python3 -o ../output-python3 sdp.g4
+java -jar antlr-4.8-complete.jar -Dlanguage=Python2 -o ../output-python2 sdp.g4
 java -jar antlr-4.8-complete.jar -Dlanguage=Swift -o ../output-swift sdp.g4
 java -jar antlr-4.8-complete.jar -Dlanguage=PHP -o ../output-php sdp.g4
 
