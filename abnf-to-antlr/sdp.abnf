@@ -38,7 +38,7 @@ email-fields =        *(%x65 "=" email-address CRLF)
 
 phone-fields =        *(%x70 "=" phone-number CRLF)
 
-   connection-field =    %x63 "=" nettype SP addrtype SP
+connection-field =    %x63 "=" nettype SP addrtype SP
                          connection-address CRLF
                          ;a connection field must be present
                          ;in every media description or at the
@@ -435,14 +435,15 @@ WSP            =  SP / HTAB
                         ; white space
 
 ; rfc3986 URI
-URI           = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+; renamed URI -> xxURI for namespace
+xxURI           = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
 
 hier-part     = "//" authority path-abempty
                 / path-absolute
                 / path-rootless
                 / path-empty
 
-URI-reference = URI / relative-ref
+URI-reference = xxURI / relative-ref
 
 absolute-URI  = scheme ":" hier-part [ "?" query ]
 
