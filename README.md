@@ -1,11 +1,31 @@
 # sdp-antlr-abnf
-One step RFC4566 SDP ABNF to Antlr, to C#, Go, Java, etc. Fixed ABNF to compile/work.
+
+
+SDP: Session Description Protocol  parsers for:  Go, C++, C#, Java, JS, PHP, Swift, Python
+
+
+If you need an SDP parser you are looking output-*
+
+You will also need an Antlr4 runtime for your target.
+
+So, for Go users, it is simply: go get github.com/antlr/antlr4/runtime/Go/antlr
+
+For other targets, C#, Java, etc... this page explains where to get your runtime: 
+https://www.antlr.org/download.html
 
 
 
-The main value here is:
-- Fixed, changes to the ABNF to enable conversion to Antlr input (g4)
-- Bundling of both Antlr and the ABNF to Antlr tool. 
-- A simple Windows BAT file to do both ABNF->Antlr->C#, Java, Go code
-- Should be very simple to convert to bash script using Mono and java on Linux
-- Please submit a PR if you write a bash script
+
+
+The ABNF syntax has been pulled from the ABNF in the various SDP RFCs.
+
+And any obvious issues ironed out or fixed.
+
+The generated code implements the Antlr Listener Pattern.
+
+
+The repo history shows the evolution of the abnf including any fixes to make it translatable.
+
+The C# output for this project is in use in a commercial project.
+
+
