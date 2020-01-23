@@ -20,10 +20,10 @@ rem "C:\Program Files\Java\jdk1.7.0_80\bin\javac.exe" -cp antlr-4.7.2-complete.j
 
 rem add your own output language possibly
 
-echo grammar Sdp; >Sdp.g4
-Abnf-To-Antlr-1.5.1-Binaries\AbnfToAntlr.exe Sdp.abnf >>Sdp.g4
-java -jar antlr\antlr-4.7.2-complete.jar -Dlanguage=CSharp -o out\cs Sdp.g4
-java -jar antlr\antlr-4.7.2-complete.jar -Dlanguage=Go -o out\go Sdp.g4
+echo grammar sdp; >sdp.g4
+Abnf-To-Antlr-1.5.1-Binaries\AbnfToAntlr.exe Sdp.abnf >>sdp.g4
+java -jar antlr\antlr-4.7.2-complete.jar -Dlanguage=CSharp -o out\cs sdp.g4
+java -jar antlr\antlr-4.7.2-complete.jar -Dlanguage=Go -o out\go sdp.g4
 
 
 
