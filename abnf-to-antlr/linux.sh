@@ -4,6 +4,7 @@
 
 # if you do need to run this, dont be afraid to run line by line by hand
 
+# was written for Ubuntu 18.04
 
 # setup the Mono repos
 sudo apt install gnupg ca-certificates
@@ -28,5 +29,12 @@ unix2dos sdp.abnf           # fixup crlf
 # create a wellformed g4 file, with header line
 echo "grammar sdp;" >sdp.g4
 mono ./Abnf-To-Antlr/AbnfToAntlr/bin/Debug/AbnfToAntlr.exe sdp.abnf >>sdp.g4
-java -jar ../antlr/antlr-4.7.2-complete.jar -Dlanguage=Go -o ../go-output sdp.g4
+java -jar antlr/antlr-4.7.2-complete.jar -Dlanguage=Go -o ../output-go sdp.g4
+java -jar antlr/antlr-4.7.2-complete.jar -Dlanguage=Java -o ../output-java sdp.g4
+java -jar antlr/antlr-4.7.2-complete.jar -Dlanguage=CSharp -o ../output-csharp sdp.g4
+java -jar antlr/antlr-4.7.2-complete.jar -Dlanguage=Cpp -o ../output-cpp sdp.g4
+java -jar antlr/antlr-4.7.2-complete.jar -Dlanguage=Javascript -o ../output-js sdp.g4
+java -jar antlr/antlr-4.7.2-complete.jar -Dlanguage=Python -o ../output-python sdp.g4
+java -jar antlr/antlr-4.7.2-complete.jar -Dlanguage=Swift -o ../output-swift sdp.g4
+java -jar antlr/antlr-4.7.2-complete.jar -Dlanguage=PHP -o ../output-php sdp.g4
 
