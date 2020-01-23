@@ -25,10 +25,9 @@ http://www.robertpinchbeck.com/abnf_to_antlr/Default.aspx (not used by us)
 
 This is how we convert the abnf to Antlr g4 format.
 
-You have your choice of Linux or Windows scripts:
+Use Ubuntu 18.04 for translating abnf -> g4 -> *.go *.cs *.xxx
 
+Use linux.sh  for the process
 
-1. Under Linux, see linux.sh   was written for Ubuntu 18.04
-2. Under Windows, see windows-abnf-to-antlr.bat
 
 
